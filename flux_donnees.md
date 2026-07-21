@@ -45,8 +45,8 @@ flowchart LR
 
 ## Décisions associées
 
-- Source(s) retenues en priorité : `capteurs_iot.csv` (signaux température/vibration/débit) et `logs_machines.log` (les ERROR comme proxy du défaut).
-- Source(s) écartées : `erp_export.json` — export **batch quotidien**, fraîcheur incompatible avec un scoring préventif quasi temps réel (+ enjeu RGPD `ouvrier_id`).
+- Source(s) retenues en priorité : `capteurs_iot.csv` (signaux température/vibration/débit), `logs_machines.log` (les ERROR comme proxy du défaut) et `erp_export.json` (contexte produit/quantité/ligne ; export quotidien compatible avec un horizon d'anticipation à 24h — `ouvrier_id` à anonymiser).
+- Source(s) écartées : aucune.
 - Source bonus (rapports `.md`) traitée ? non — mission RAG optionnelle non traitée.
 
 ---
