@@ -1,65 +1,53 @@
 # Note d'identification des sources — Acerox Métallurgie
 
-> Document remis à **Sébastien Marchand** (chef de projet industrialisation
-> Acerox). **2-3 pages max.** Public : décideur métier non-technique —
-> langage courant, pas de jargon scikit-learn ou SQL.
-> Auteur : `<prénom>` — Date : `<date>`
+> Auteur : Franck — Date : 2026-07-21
 
 ## 1. Contexte
 
-> 1 paragraphe — qui est Acerox ? quel est leur existant ? quelle est la
-> demande FastIA ?
+entreprise de métallurgie, avec des lignes de production   
+possède déjà un modèle qui détecte les défauts sur la ligne de production  
+demande :
+- enrichir leur modèle de détection des défauts 
+- passer d'un modèle réactif (arrêt de la prod) à un modèle préventif (prévenir les productions défectueuses)
 
-...
 
 ## 2. Demande métier reformulée
 
-> 1 paragraphe — ce que Sébastien veut **vraiment**, distingué de ce qu'il
-> a *dit*. Reformulation en termes de décision métier à améliorer.
+Ce que Sébastien a demandé : passer d'un modèle réactif (arrêt de la prod) à un modèle préventif (prévenir les productions défectueuses)
 
-Ce que Sébastien a demandé : ...
-
-Ce que je comprends qu'il cherche vraiment : ...
+Ce que je comprends qu'il cherche vraiment : avoir un modèle qui détecte des certains seuils des capteurs sur la ligne de production, qui vont prévoir qu'il y aura bientôt des défauts, pour déclencher une maintenance, avant qu'il y ait effectivement des pièces défectueuses. 
 
 ## 3. Inventaire des sources
 
-> Une ligne par source que **vous** avez identifiée (fichiers reçus +
-> ce que vous découvrez en explorant les données). Le nom exact du fichier
-> fait partie de l'inventaire à dresser.
 
-| Source | Format | Volume | Fréquence | Qualité observée | Risques RGPD | Pertinence métier |
-|---|---|---|---|---|---|---|
-| *(ex. `nom_fichier.csv`)* | ... | ... | ... | ... | ... | ... |
-| ... | ... | ... | ... | ... | ... | ... |
-| ... | ... | ... | ... | ... | ... | ... |
+| Source | Format | Volume | Fréquence | Qualité observée | Risques RGPD | Pertinence métier                                                              |
+|---|---|---|---|---|---|--------------------------------------------------------------------------------|
+| `capteurs_iot.csv` | CSV | ~3,6 Mo — 51 000 lignes × 7 colonnes | ~1 relevé / 3-5 min par capteur (8 capteurs) — période du 01 au 29 avr. 2026 (1 mois) | 749 NaN sur `vibration_mms` ; couverture inégale (Lyon 2× moins, LINE-1 ~4× LINE-4) ; **pas de cible défaut** | RAS en propre (aucune donnée perso) ; vigilance au croisement avec l'ERP | Source très importante : signaux température/vibration/débit pour le préventif |
+| `erp_export.json` | JSON | ~545 Ko — 2 000 ordres × 9 colonnes | événementiel — ~70 ordres lancés / jour, période du 01 au 29 avr. 2026 (1 mois) | `statut` déséquilibré (`termine` 1 559 vs autres <200) ; 109 `ouvrier_id` manquants | ⚠️ `ouvrier_id` = donnée personnelle (identifie un employé) — cœur du risque | Contexte de production (produit, quantité, ligne) ; croisement CSV via `site`+`line_id`+fenêtre temporelle |
+| `logs_machines.log` | texte brut (log) | ~1,8 Mo — 30 000 lignes | événementiel — ~1 000 lignes/jour, période du 01 au 29 avr. 2026 (1 mois) ; 3 niveaux d'événements : INFO (ex. `machine_started`, `shift_changed`), WARN (ex. `vibration_threshold_approached`, `temperature_drift_detected`), ERROR (ex. `emergency_stop`, `temperature_critical`) | texte brut à parser (regex) ; INFO 22 501 / WARN 5 758 / ERROR 1 741 ; ~60 ERROR/jour, aucun pic | Aucun id employé en propre ; risque seulement au croisement (`operator_login` + `ouvrier_id` ERP) | Corrèle avec les capteurs : Roubaix LINE-3 = 598 ERROR + vibration ~3× la normale → signal avant-coureur pour le préventif |
 
 ## 4. Recommandations
 
-> 3-5 puces. Quelles sources ingérer en priorité ? Lesquelles écarter et
-> pourquoi ?
-
-- ...
-- ...
-- ...
+- le csv avec les capteurs IOT est la source la plus importante, elle contient les signaux température/vibration/débit qui serviront à détecter les possibiles  
+- ensuite, logs_machines.log  contiennent un proxy du défaut (les ERROR)
+- le json de l'ERP peut être utile pour le contexte (produit, ligne), à utiliser en anonymisant ouvrier_id pour éviter les problèmes RGPD
 
 ## 5. Points à clarifier avec Sébastien
 
-> 3-5 questions ouvertes restantes — preuve de lucidité sur ce qu'on ne
-> sait pas encore.
-
-1. ...
-2. ...
-3. ...
+1. Pourquoi Lyon n'a-t-il qu'un seul capteur ? 
+2. Pourquoi 109 ordres ERP sans `ouvrier_id` ?
+3. Où est la vérité terrain des défauts (aucune cible dans les 3 sources) ? Est-ce que les ERROR sont un proxy des défauts ? 
+4. Roubaix LINE-3 vibre 3× la normale et concentre les erreurs : est-ce une vraie anomalie machine, ou un capteur déréglé ? 
 
 ## 6. Limites de cette note
-
-> Ce qu'on n'a **pas** fait, et qu'il faudrait faire plus tard.
 
 - Pas d'analyse statistique fouillée des sources (M3-B1 = identification,
   pas EDA complète)
 - Pas d'AIPD juridique formelle (recommandation : escalader au DPO Acerox)
-- ...
+- Le proxy de défaut n'est pas validé : on assimile les ERROR des logs à des défauts qualité, mais rien
+  ne prouve que vibration_overlimit/temperature_critical == pièce réellement défectueuse
+- observations effectuées sans réelle fusion des sources 
 
 ---
 
-*Note produite par <prénom>, <date>, dans le cadre du brief M3-B1 ATOS.*
+*Note produite par Franck, 2026-07-21, dans le cadre du brief M3-B1 Dev-id.*
