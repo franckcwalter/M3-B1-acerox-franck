@@ -7,6 +7,15 @@
 
 ---
 
+## 🗣️ Entretien client
+
+Le projet démarre par un entretien avec Sébastien Marchand (Acerox), qui
+cadre le besoin métier, les sources disponibles et les contraintes RGPD.
+Les notes complètes (dit vs interprété, 5 catégories) sont dans
+[`notes_entretien.md`](./notes_entretien.md).
+
+---
+
 ## 🚀 Démarrage (4 commandes)
 
 ```bash
@@ -27,92 +36,72 @@ jupyter notebook notebooks/M3-B1_template.ipynb       # → s'ouvre dans le navi
 
 Si ces 4 commandes marchent, ton poste est prêt.
 
-> ⚠️ Les 3 sources te seront fournies **mardi 9h après l'entretien
-> fictif** par la formatrice (Discord). Place-les dans `data/`. Le
-> `.gitignore` exclut `data/*.csv`, `data/*.json`, `data/*.log` du commit.
-
 ---
 
 ## 📁 Structure du repo
 
 ```
-M3-B1-<client>-<prenom>/
-├── data/                                # gitignored (sauf jeu jouet provenance)
-│   ├── capteurs_iot.csv                 # fourni mardi 9h
-│   ├── erp_export.json                  # fourni mardi 9h
-│   ├── logs_machines.log                # fourni mardi 9h
+M3-B1-acerox-franck/
+├── data/                                # gitignored (sauf jeux jouets provenance)
+│   ├── capteurs_iot.csv                 # source 1 — ~51k lignes
+│   ├── erp_export.json                  # source 2 — ~2k ordres (enjeu RGPD : ouvrier_id)
+│   ├── logs_machines.log                # source 3 — ~30k lignes de texte brut
 │   ├── capteurs_site_A.csv              # versionné — jeu jouet fusion/provenance
-│   └── capteurs_site_B.csv              # versionné — 2e export comparable
+│   ├── capteurs_site_B.csv              # versionné — 2e export comparable
+│   └── rapports_techniques_2024/        # corpus RAG (bonus) — rapports .md
 ├── notebooks/
-│   ├── M3-B1_template.ipynb             # exploration rapide 3 sources
-│   └── M3-B1_fusion_provenance.ipynb    # fusion 2 exports + colonne source
-├── ressources/                          # 📚 mini-cours d'appui
+│   ├── M3-B1_franck.ipynb               # exploration des 3 sources
+│   ├── M3-B1_fusion_provenance.ipynb    # fusion 2 exports + colonne source
+│   ├── M3-B1_rag_prepa_franck.ipynb     # prépa RAG (bonus) — chunk / embedding / ChromaDB
+│   └── chroma_acerox/                   # base ChromaDB générée (bonus)
+├── ressources/                          # mini-cours d'appui
 │   ├── README.md
 │   ├── 01_Entretien_client_essentiel.md
 │   ├── 02_Cartographie_sources_essentiel.md
 │   ├── 03_Risques_RGPD_multisources_essentiel.md
 │   ├── 04_Schema_Mermaid_flux_essentiel.md
 │   ├── 05_Note_identification_essentiel.md
+│   ├── 06_RAG_prepa_essentiel.md
 │   └── liens_officiels.md
 ├── identification_sources.md            # livrable principal (2-3 pages)
 ├── flux_donnees.md                      # schéma Mermaid + légende
-├── notes_entretien.md                   # tes notes prises à 9h30
+├── notes_entretien.md                   # notes de l'entretien client
+├── CLAUDE.md                            # guidage pour l'assistant
 ├── requirements.txt
 ├── .gitignore
-└── README.md (ce fichier — à compléter)
+└── README.md
 ```
 
 ---
 
-## 📚 Mini-cours d'appui
+## 🗺️ Cartographie des sources
 
-Les **5 mini-cours pédagogiques** sont fournis dans
-[`./ressources/`](./ressources/). Lecture juste-à-temps, ~15-20 min chacun :
+Les 3 sources hétérogènes (`capteurs_iot.csv`, `erp_export.json`,
+`logs_machines.log`) sont explorées en lecture seule — format, volume,
+fréquence, qualité, risques RGPD — sans aucune transformation.
 
-| Tâche | Mini-cours |
-|---|---|
-| Préparer l'entretien client | [`01_Entretien_client_essentiel.md`](./ressources/01_Entretien_client_essentiel.md) |
-| Cartographier les sources | [`02_Cartographie_sources_essentiel.md`](./ressources/02_Cartographie_sources_essentiel.md) |
-| Risques RGPD multi-sources | [`03_Risques_RGPD_multisources_essentiel.md`](./ressources/03_Risques_RGPD_multisources_essentiel.md) |
-| Schématiser les flux (Mermaid) | [`04_Schema_Mermaid_flux_essentiel.md`](./ressources/04_Schema_Mermaid_flux_essentiel.md) |
-| Rédiger la note d'identification | [`05_Note_identification_essentiel.md`](./ressources/05_Note_identification_essentiel.md) |
+- **Exploration** : [`notebooks/M3-B1_franck.ipynb`](./notebooks/M3-B1_franck.ipynb) — une cellule d'observations par source (doublons, manquants, capteur défaillant, `ouvrier_id`…).
+- **Synthèse** : [`identification_sources.md`](./identification_sources.md) — inventaire, risques et recommandations, lisible par un décideur.
+- **Flux de données** : [`flux_donnees.md`](./flux_donnees.md) — schéma Mermaid des flux entre sources.
 
-Cf. [`./ressources/README.md`](./ressources/README.md) pour l'ordre détaillé.
+En bref :
 
----
-
-## 🧭 Démarche attendue
-
-1. **Préparation entretien** (30 min, 9h00-9h30) — 8-12 questions catégorisées
-2. **Entretien fictif** (30 min, 9h30-10h00) — visio Discord, notes au fil de l'eau
-3. **Analyse des 3 sources** (2 h, 10h00-12h30) — `pd.read_*` + `info` + `describe`
-3 bis. **Fusion + provenance** (~30 min) — ouvre
-   [`notebooks/M3-B1_fusion_provenance.ipynb`](./notebooks/M3-B1_fusion_provenance.ipynb) :
-   réunis **deux exports comparables** (`capteurs_site_A/B.csv`, déjà dans
-   `data/`) avec une colonne `source`, et débusque les 3 pièges (ids qui se
-   chevauchent, unité de température oubliée, colonne absente). C'est le geste
-   **exact** que le cas d'usage certif attend côté données — reporte une phrase
-   dans `identification_sources.md`.
-4. **Schéma Mermaid** (1 h, 13h30-14h30) — `flux_donnees.md`
-5. **Note d'identification** (1 h 30, 14h30-16h00) — `identification_sources.md`
-6. **Restitution** (30 min, 16h00-16h30) — 3 min/apprenant en plénière
-
-→ Compétences visées : **C1 — imiter** + **C2 — adapter**.
+- **`capteurs_iot.csv`** (CSV, ~51 k lignes) — signaux température / vibration / débit, cœur du préventif ; capteur Roubaix L3 défaillant (vibration figée) et 1 000 doublons à écarter. RGPD faible.
+- **`erp_export.json`** (JSON, ~2 k ordres) — contexte de production (produit, quantité, ligne), export quotidien ; porte `ouvrier_id`, la donnée personnelle au cœur du risque RGPD.
+- **`logs_machines.log`** (texte, ~30 k lignes) — événements INFO/WARN/ERROR à parser, source secondaire ; risque RGPD seulement au croisement avec l'ERP.
 
 ---
 
-## ✅ Conventions de code
+## 🔎 Préparation RAG
 
-- Python 3.11+
-- Pas de transformation de données dans le notebook (juste exploration)
-- Markdown structuré dans tous les `.md`
-- Mermaid intégré dans `flux_donnees.md`
+Un quatrième jeu de données, `data/rapports_techniques_2024/` (cinq rapports
+techniques en français), contient du texte non structuré préparé pour une
+recherche par similarité sémantique dans
+[`notebooks/M3-B1_rag_prepa_franck.ipynb`](./notebooks/M3-B1_rag_prepa_franck.ipynb) :
+chaque rapport est découpé par titre Markdown, transformé en embeddings via un
+modèle local (`all-MiniLM-L6-v2`, sans clé API), puis indexé dans une base
+ChromaDB persistante que l'on interroge en langage naturel.
 
----
+Le travail s'arrête à la récupération des passages. L'exécution nécessite
+`chromadb` et `sentence-transformers` (voir `requirements.txt`).
 
-## 🆘 Bloqué·e ?
-
-1. Relis le mini-cours correspondant à ta tâche (cf. [`./ressources/README.md`](./ressources/README.md))
-2. Si tu n'arrives pas à parser les logs : pas grave, décris-les en
-   pseudo-code dans la note. **Pas de code lourd ici** — c'est M3-B2 demain.
-3. Demande sur Discord (`fil-M3-B1`).

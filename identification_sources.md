@@ -44,7 +44,7 @@ Ce que je comprends qu'il cherche vraiment :
 2. Pourquoi 109 ordres ERP sans `ouvrier_id` ?
 3. Où est la vérité terrain des défauts (aucune cible dans les 3 sources) ? Est-ce que les ERROR sont un proxy des défauts ? 
 4. Le capteur défaillant peut-il être remplacé ? 
-5. Quelle latence entre l'acquisition de la données et la prédiction (24h OK ou ça doit être en quasi temps réel ?) car ça détermine quelles données on peut utiliser. 
+5. Quelle latence entre l'acquisition de la donnée et la prédiction (24h OK ou ça doit être en quasi temps réel ?) car ça détermine quelles données on peut utiliser. 
 
 ## 6. Limites de cette note
 

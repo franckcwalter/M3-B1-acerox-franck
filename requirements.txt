@@ -11,5 +11,5 @@ ipykernel==6.29.5
 
 # Optionnel — décommente pour la mission étoile (bonus RAG : préparation)
 # Loader fait main (PAS de LangChain), index vectoriel + embeddings 100 % locaux
-# chromadb==0.5.18
-# sentence-transformers==3.3.1
+chromadb==0.5.18
+sentence-transformers==3.3.1
